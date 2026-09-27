@@ -112,4 +112,4 @@ fi
 
 # Collect all arguments for the java sub-shell.
 # By default, the wrapper uses standard quoting.
-exec "$JAVACMD" "$@" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
+exec "$JAVACMD" -classpath "$CLASSPATH" org.gradle.wrapper.GradleWrapperMain "$@"
