@@ -1,6 +1,8 @@
 /**
  * Audio Synthesizer and Indonesian Female Speech Engine
  */
+import { Capacitor } from '@capacitor/core';
+import { QueueStrategy, TextToSpeech } from '@capacitor-community/text-to-speech';
 
 let audioCtx: AudioContext | null = null;
 let soundEnabled = true;
@@ -141,8 +143,39 @@ export function playSound(type: 'click' | 'correct' | 'wrong' | 'star' | 'victor
 
 /**
  * Text-to-Speech specifically tuned for Indonesian Female voice ("Suara Perempuan")
+ *
+ * On native Android (Capacitor APK) this uses the native TextToSpeech plugin,
+ * because WebView speechSynthesis often has no usable voices and stays silent.
+ * On web it falls back to the browser speechSynthesis implementation below.
  */
 export function speakIndonesian(text: string, rate = 0.85): Promise<void> {
+  if (Capacitor.isNativePlatform()) {
+    return speakNativeIndonesian(text, rate);
+  }
+  return speakWebIndonesian(text, rate);
+}
+
+async function speakNativeIndonesian(text: string, rate = 0.85): Promise<void> {
+  try {
+    await TextToSpeech.stop();
+  } catch {
+    // ignore stop errors when nothing is playing
+  }
+  try {
+    await TextToSpeech.speak({
+      text,
+      lang: 'id-ID',
+      rate,
+      pitch: 1.15,
+      volume: 1.0,
+      queueStrategy: QueueStrategy.Flush,
+    });
+  } catch (err) {
+    console.warn('Native TTS error:', err);
+  }
+}
+
+function speakWebIndonesian(text: string, rate = 0.85): Promise<void> {
   return new Promise((resolve) => {
     if (!('speechSynthesis' in window)) {
       console.warn('Speech synthesis not supported');
