@@ -46,7 +46,14 @@ jobs:
           java-version: '21'
 
       - name: Setup Android SDK & Build Tools
-        uses: android-actions/setup-android@v3
+        run: |
+          echo "ANDROID_HOME=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          echo "ANDROID_SDK_ROOT=/usr/local/lib/android/sdk" >> $GITHUB_ENV
+          export ANDROID_HOME=/usr/local/lib/android/sdk
+          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
+          export PATH=$ANDROID_HOME/cmdline-tools/latest/bin:$ANDROID_HOME/platform-tools:$PATH
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0" --sdk_root=$ANDROID_HOME
+          yes | sdkmanager --licenses --sdk_root=$ANDROID_HOME || true
 
       - name: Make Gradle Wrapper Executable
         run: |
